@@ -1,52 +1,71 @@
-﻿#include "Color.h"    // or whichever headers you need
-#include "Vector.h"
+﻿#include "Interval.h"
+#include "Color.h"
+#include "Sphere_list.h"
+#include "Sphere.h"
 #include <iostream>
+#include "Utilities.h"
+
+using std::make_shared;
 
 
-// turn a direction into a sky‐gradient color
-color getColor(const vec3& direction) {
-    vec3 unit_dir = unit_vector(direction);
-    auto t = 0.5 * (unit_dir.y() + 1.0);
-    // lerp( white, light blue, t )
+color ray_color(const ray& r, const sphere_list& world) {
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec)) {
+        return 0.5 * (rec.normal + color(1, 1, 1));
+    }
+    vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * color(1.0, 1.0, 1.0)
         + t * color(0.5, 0.7, 1.0);
 }
 
+
+
 int main() {
     // Image
     const auto aspect_ratio = 16.0 / 9.0;
-    const int image_width = 16;
+    const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
 
-    // Camera
-    const auto viewport_height = 2.0;
-    const auto viewport_width = aspect_ratio * viewport_height;
-    const auto focal_length = 1.0;
+    //matt creation
+    auto mat_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+    auto mat_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
 
-    const auto origin = point3(0, 0, 0);
-    const auto horizontal = vec3(viewport_width, 0, 0);
-    const auto vertical = vec3(0, viewport_height, 0);
-    const auto lower_left_corner =
+
+    // World
+    sphere_list world;
+    world.add(sphere(point3(0, -100.5, -1), 100.0, mat_ground));
+    world.add(sphere(point3(0, 0.0, -1), 0.5, mat_center));
+
+    // Camera
+    auto viewport_height = 2.0;
+    auto viewport_width = aspect_ratio * viewport_height;
+    auto focal_length = 1.0;
+
+    auto origin = point3(0, 0, 0);
+    auto horizontal = vec3(viewport_width, 0, 0);
+    auto vertical = vec3(0, viewport_height, 0);
+    auto lower_left_corner =
         origin
         - horizontal / 2
         - vertical / 2
         - vec3(0, 0, focal_length);
 
     // Render
-    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+    std::cout << "P3\n"
+        << image_width << ' ' << image_height << "\n255\n";
 
     for (int j = image_height - 1; j >= 0; --j) {
         std::cerr << "Scanlines remaining: " << j << '\n';
         for (int i = 0; i < image_width; ++i) {
             auto u = double(i) / (image_width - 1);
             auto v = double(j) / (image_height - 1);
-            vec3 vec = lower_left_corner
+            ray r(origin,
+                lower_left_corner
                 + u * horizontal
                 + v * vertical
-                - origin;
-
-            // this creates a 'color' variable called 'pixel_color'
-            color pixel_color = getColor(vec);
+                - origin);
+            color pixel_color = ray_color(r, world);
             write_color(std::cout, pixel_color);
         }
     }
