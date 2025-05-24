@@ -1,16 +1,22 @@
 ﻿#include "Interval.h"
+#include "Hittable.h"
 #include "Color.h"
 #include "Sphere_list.h"
 #include "Sphere.h"
 #include <iostream>
 #include "Utilities.h"
+#include "Material.h"
+
 
 using std::make_shared;
 
 
+
 color ray_color(const ray& r, const sphere_list& world) {
     hit_record rec;
-    if (world.hit(r, 0, infinity, rec)) {
+    
+    interval ray_interval(0.001, infinity); // Small epsilon to avoid shadow acne
+    if (world.hit(r, ray_interval, rec)) {
         return 0.5 * (rec.normal + color(1, 1, 1));
     }
     vec3 unit_direction = unit_vector(r.direction());
@@ -19,7 +25,7 @@ color ray_color(const ray& r, const sphere_list& world) {
         + t * color(0.5, 0.7, 1.0);
 }
 
-
+auto default_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
 
 int main() {
     // Image
@@ -28,14 +34,12 @@ int main() {
     const int image_height = static_cast<int>(image_width / aspect_ratio);
 
     //matt creation
-    auto mat_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto mat_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-
+  
 
     // World
     sphere_list world;
-    world.add(sphere(point3(0, -100.5, -1), 100.0, mat_ground));
-    world.add(sphere(point3(0, 0.0, -1), 0.5, mat_center));
+    world.add(sphere(point3(0, -100.5, -1), 100.0, default_material));
+    world.add(sphere(point3(0, 0.0, -1), 0.5, default_material));
 
     // Camera
     auto viewport_height = 2.0;

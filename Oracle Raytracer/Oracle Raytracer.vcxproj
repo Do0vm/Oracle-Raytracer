@@ -127,7 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Interval.cpp" />
     <ClCompile Include="Oracle Raytracer.cpp" />
   </ItemGroup>
   <ItemGroup>

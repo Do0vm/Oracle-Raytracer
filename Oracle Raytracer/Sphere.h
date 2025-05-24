@@ -5,7 +5,7 @@
 
 class sphere : public hittable {
 public:
-    sphere() {}
+    sphere() : radius(0.0) {}
     sphere(point3 cen, double r, shared_ptr<material> m) : center(cen), radius(r), mat(m) {};
 
     virtual bool hit(
@@ -45,5 +45,6 @@ bool sphere::hit(const ray& r, interval ray_t, hit_record& rec) const {
 
     return true;
 }
+
 
 #endif
