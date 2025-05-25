@@ -5,18 +5,11 @@
 #include <iostream>
 #include <cstdlib>
 #include "Interval.h"
+#include "Utilities.h"
 
 using std::sqrt;
 
-// returns a random real in [0,1)
-inline double random_double() {
-    return std::rand() / (RAND_MAX + 1.0);
-}
 
-// returns a random real in [min,max)
-inline double random_double(double min, double max) {
-    return min + (max - min) * random_double();
-}
 
 class vec3 {
 public:
