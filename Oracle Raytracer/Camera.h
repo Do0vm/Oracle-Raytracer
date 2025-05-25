@@ -6,6 +6,9 @@
 #include "Color.h"
 #include "Hittable.h"
 #include "Material.h"
+#include <fstream>
+#include <iostream>
+#include <string>
 
 #include <iostream>
 
@@ -25,34 +28,39 @@ public:
 
 
 
-    void render(const hittable& world) {
+    void render(const hittable& world, const std::string& filename = "output.ppm") {
         initialize();
 
-        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+        // Create output file stream
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Could not create file " << filename << std::endl;
+            return;
+        }
+
+        // Write PPM header to file instead of cout
+        file << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+
         for (int j = 0; j < image_height; ++j) {
             std::clog << "Scanlines remaining: " << (image_height - j) << "\n";
             for (int i = 0; i < image_width; ++i) {
-
                 color pixel_color(0, 0, 0);
-
                 for (int sample = 0; sample < samples_per_pixel; sample++) {
                     // auto offset = sample_square();
                     auto offset = vec3(0, 0, 0);
                     auto pixel_center = pixel00_loc + ((i + offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);
-
                     auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
                     auto ray_direction = pixel_center - ray_origin;
                     ray r(ray_origin, ray_direction);
-
                     pixel_color += ray_color(r, max_depth, world);
                 }
-
-
-                write_color(std::cout, pixel_color / samples_per_pixel);
+                // Write color to file instead of cout
+                write_color(file, pixel_color / samples_per_pixel);
             }
         }
 
-        std::clog << "Done.                 \n";
+        file.close();
+        std::clog << "Done. Image saved as " << filename << "\n";
     }
 
 private:
