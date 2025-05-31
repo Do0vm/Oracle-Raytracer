@@ -59,7 +59,8 @@ int main() {
     // Right leg
     world.add(make_shared<sphere>(base_center + (vec3(0.15, -0.5, leg_z_offset_base) * scale), 0.15 * scale, humanoid_material));  // Thigh
     world.add(make_shared<sphere>(base_center + (vec3(0.15, -0.9, leg_z_offset_base) * scale), 0.14 * scale, humanoid_material)); // Shin
-
+  /*  auto center2 = center + vec3(0, random_double(0, .5), 0);
+    world.add(make_shared<sphere>(center, center2, 0.2, sphere_material));*/ // for move spheres
     // --- MODIFICATIONS END ---
 
     camera cam;

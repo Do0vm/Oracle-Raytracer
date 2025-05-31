@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include "Ray.h"
 #include <iostream>
 
 class camera {
@@ -53,6 +53,9 @@ public:
                     auto ray_direction = pixel_center - ray_origin;
                     ray r(ray_origin, ray_direction);
                     pixel_color += ray_color(r, max_depth, world);
+
+                    auto ray_time = random_double(); // Assumes random_double() returns a value in [0,1) or appropriate range
+                    ray r(ray_origin, ray_direction, ray_time);
                 }
                 // Write color to file instead of cout
                 write_color(file, pixel_color / samples_per_pixel);
@@ -72,8 +75,7 @@ private:
     vec3   u, v, w;              // Camera frame basis vectors
     vec3   defocus_disk_u;       // Defocus disk horizontal radius
     vec3   defocus_disk_v;       // Defocus disk vertical radius
-
-
+    
     void initialize() {
         image_height = static_cast<int>(image_width / aspect_ratio);
         image_height = (image_height < 1) ? 1 : image_height;
@@ -109,6 +111,8 @@ private:
         auto defocus_radius = focus_dist * tan(degrees_to_radians(defocus_angle / 2));
         defocus_disk_u = u * defocus_radius;
         defocus_disk_v = v * defocus_radius;
+
+        
     }
 
     point3 defocus_disk_sample() const {
